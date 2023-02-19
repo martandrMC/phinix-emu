@@ -50,8 +50,9 @@ public class Main {
 		};
 		
 		cpu = new CPU(memory, io);
+		long max_cycles = 100_000;
 		long counter, time = System.nanoTime();
-		for(counter=0; !isSet(cpu.getState().reg_st, 0); counter++)
+		for(counter=0; !isSet(cpu.getState().reg_st, 0) && counter < max_cycles; counter++)
 			cpu.execute();
 		long elapsed = System.nanoTime() - time;
 		

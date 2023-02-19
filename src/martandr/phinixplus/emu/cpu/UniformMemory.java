@@ -36,8 +36,8 @@ public class UniformMemory implements Addressable {
 		}
 		int counter = 0;
 		while(sc.hasNextLine()) {
-			String line = sc.nextLine().trim();
-			if(line.isEmpty() || line.startsWith(";")) continue;
+			String line = sc.nextLine().replaceAll(";.*", "").trim();
+			if(line.isEmpty()) continue;
 			String[] words = line.split("\\s+");
 			for(String word : words) {
 				if(counter >= 65536) {

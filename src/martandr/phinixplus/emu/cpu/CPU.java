@@ -15,7 +15,7 @@ public class CPU {
 	}
 	
 	private static final ArrayList<BiConsumer<Integer, State>> impls;
-	private static final int[] double_word = { // TODO : redo this; opcodes moved around
+	private static final int[] double_word = {
 			0x00004000, 0x00000000, 0xAAAAC00C, 0xA0000000,
 			0x00000000, 0x00000000, 0xFFFF0000, 0x0000F0F0
 	};
@@ -76,13 +76,13 @@ public class CPU {
 		BiConsumer<Integer, State> prdr = (i, s) -> s.skip = !Main.isSet(s.reg_rf, getIms(i));
 		
 		BiConsumer<Integer, State> prdc = (i, s) -> s.skip = !evalCond(getOpc(i), s);
-		BiConsumer<Integer, State> prdp = (i, s) -> s.skip = !evalProp(getOpc(i), s);
+		BiConsumer<Integer, State> prdp = (i, s) -> s.skip = !evalProp(getOpc(i), s.primary_regfile[getDst(i)], s);
 		
 		BiConsumer<Integer, State> rbcc = (i, s) -> s.reg_rf &= ~(evalCond(getOpc(i), s) ? 0 : 1<<getIms(i));
 		BiConsumer<Integer, State> rbdc = (i, s) -> s.reg_rf |= (evalCond(getOpc(i), s) ? 1<<getIms(i) : 0);
 		
-		BiConsumer<Integer, State> rbcp = (i, s) -> s.reg_rf &= ~(evalProp(getOpc(i), s) ? 0 : 1<<getIms(i));
-		BiConsumer<Integer, State> rbdp = (i, s) -> s.reg_rf |= (evalProp(getOpc(i), s) ? 1<<getIms(i) : 0);
+		BiConsumer<Integer, State> rbcp = (i, s) -> s.reg_rf &= ~(evalProp(getOpc(i), s.primary_regfile[getDst(i)], s) ? 0 : 1<<getIms(i));
+		BiConsumer<Integer, State> rbdp = (i, s) -> s.reg_rf |= (evalProp(getOpc(i), s.primary_regfile[getDst(i)], s) ? 1<<getIms(i) : 0);
 		
 		BiConsumer<Integer, State> addrx = (i, s) -> {
 			int a = s.primary_regfile[getDst(i)];
@@ -465,11 +465,17 @@ public class CPU {
 		
 		BiConsumer<Integer, State> out = (i, s) -> Main.getCPU().getIO().write(getImh(i), s.primary_regfile[getDst(i)]);
 		
-		BiConsumer<Integer, State> brcr = (i, s) -> { if(evalCond(getOpc(i), s)) s.reg_ip = s.primary_regfile[getDst(i)]; };
-		BiConsumer<Integer, State> brpr = (i, s) -> { if(evalProp(getOpc(i), s)) s.reg_ip = s.primary_regfile[getDst(i)] + getImx(); };
+		BiConsumer<Integer, State> brcr = (i, s) -> { if(evalCond(getOpc(i), s)) s.reg_ip = s.primary_regfile[getSrc(i)]; };
+		BiConsumer<Integer, State> brpr = (i, s) -> { 
+			if(evalProp(getOpc(i), s.primary_regfile[getDst(i)], s)) s.reg_ip = s.primary_regfile[getSrc(i)] + getImx();
+			else s.reg_ip++;
+		};
 		
-		BiConsumer<Integer, State> brci = (i, s) -> { if(evalCond(getOpc(i), s)) s.reg_ip = s.primary_regfile[getDst(i)]; };
-		BiConsumer<Integer, State> brpi = (i, s) -> { if(evalProp(getOpc(i), s)) s.reg_ip = s.primary_regfile[getDst(i)] + getImx(); };
+		BiConsumer<Integer, State> brci = (i, s) -> { if(evalCond(getOpc(i), s)) s.reg_ip = s.primary_regfile[getSrc(i)]; };
+		BiConsumer<Integer, State> brpi = (i, s) -> {
+			if(evalProp(getOpc(i), s.primary_regfile[getDst(i)], s)) s.reg_ip = s.primary_regfile[getSrc(i)] + getImx();
+			else s.reg_ip++;
+		};
 		
 		BiConsumer<Integer, State> ldry = (i, s) -> s.primary_regfile[getDst(i)] = Main.getCPU().getMemory().read(s.secondary_regfile[getSrc(i)]);
 		BiConsumer<Integer, State> mldry = (i, s) -> s.primary_regfile[getDst(i)] = Main.getCPU().getMemory().read(--s.secondary_regfile[getSrc(i)]);
@@ -641,8 +647,7 @@ public class CPU {
 	}
 	
 	// Evaluate a propery
-	private static boolean evalProp(int opcode, State state) {
-		int regval = state.primary_regfile[getDst(opcode)];
+	private static boolean evalProp(int opcode, int regval, State state) {
 		switch(opcode&7) {
 			case 0: return regval == 0;
 			case 1: return regval == state.reg_rf;
