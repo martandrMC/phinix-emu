@@ -79,9 +79,9 @@ public class CPU {
 		BiConsumer<Integer, State> prdp = (i, s) -> s.skip = !evalProp(getOpc(i), s.primary_regfile[getDst(i)], s);
 		
 		BiConsumer<Integer, State> rbcc = (i, s) -> s.reg_rf &= ~(evalCond(getOpc(i), s) ? 0 : 1<<getIms(i));
-		BiConsumer<Integer, State> rbdc = (i, s) -> s.reg_rf |= (evalCond(getOpc(i), s) ? 1<<getIms(i) : 0);
-		
 		BiConsumer<Integer, State> rbcp = (i, s) -> s.reg_rf &= ~(evalProp(getOpc(i), s.primary_regfile[getDst(i)], s) ? 0 : 1<<getIms(i));
+		
+		BiConsumer<Integer, State> rbdc = (i, s) -> s.reg_rf |= (evalCond(getOpc(i), s) ? 1<<getIms(i) : 0);
 		BiConsumer<Integer, State> rbdp = (i, s) -> s.reg_rf |= (evalProp(getOpc(i), s.primary_regfile[getDst(i)], s) ? 1<<getIms(i) : 0);
 		
 		BiConsumer<Integer, State> addrx = (i, s) -> {
@@ -99,14 +99,14 @@ public class CPU {
 			s.secondary_regfile[getDst(i)] = sum&65535;
 		};
 		BiConsumer<Integer, State> addix = (i, s) -> {
-			int a = s.primary_regfile[getDst(i)];
+			int a = s.primary_regfile[getSrc(i)];
 			int b = getImx();
 			int sum = a+b;
 			setFlags(s, isNeg(sum), isOvf(a, b, sum), (sum&65536) != 0, isZero(sum));
 			s.primary_regfile[getDst(i)] = sum&65535;
 		};
 		BiConsumer<Integer, State> addiy = (i, s) -> {
-			int a = s.secondary_regfile[getDst(i)];
+			int a = s.secondary_regfile[getSrc(i)];
 			int b = getImx();
 			int sum = a+b;
 			setFlags(s, isNeg(sum), isOvf(a, b, sum), (sum&65536) != 0, isZero(sum));
@@ -466,16 +466,10 @@ public class CPU {
 		BiConsumer<Integer, State> out = (i, s) -> Main.getCPU().getIO().write(getImh(i), s.primary_regfile[getDst(i)]);
 		
 		BiConsumer<Integer, State> brcr = (i, s) -> { if(evalCond(getOpc(i), s)) s.reg_ip = s.primary_regfile[getSrc(i)]; };
-		BiConsumer<Integer, State> brpr = (i, s) -> { 
-			if(evalProp(getOpc(i), s.primary_regfile[getDst(i)], s)) s.reg_ip = s.primary_regfile[getSrc(i)] + getImx();
-			else s.reg_ip++;
-		};
+		BiConsumer<Integer, State> brpr = (i, s) -> { if(evalProp(getOpc(i), s.primary_regfile[getDst(i)], s)) s.reg_ip = s.primary_regfile[getSrc(i)]; };
 		
-		BiConsumer<Integer, State> brci = (i, s) -> { if(evalCond(getOpc(i), s)) s.reg_ip = s.primary_regfile[getSrc(i)]; };
-		BiConsumer<Integer, State> brpi = (i, s) -> {
-			if(evalProp(getOpc(i), s.primary_regfile[getDst(i)], s)) s.reg_ip = s.primary_regfile[getSrc(i)] + getImx();
-			else s.reg_ip++;
-		};
+		BiConsumer<Integer, State> brci = (i, s) -> { if(evalCond(getOpc(i), s)) s.reg_ip = s.primary_regfile[getSrc(i)] + getImx(); };
+		BiConsumer<Integer, State> brpi = (i, s) -> { if(evalProp(getOpc(i), s.primary_regfile[getDst(i)], s)) s.reg_ip = s.primary_regfile[getSrc(i)] + getImx(); };
 		
 		BiConsumer<Integer, State> ldry = (i, s) -> s.primary_regfile[getDst(i)] = Main.getCPU().getMemory().read(s.secondary_regfile[getSrc(i)]);
 		BiConsumer<Integer, State> mldry = (i, s) -> s.primary_regfile[getDst(i)] = Main.getCPU().getMemory().read(--s.secondary_regfile[getSrc(i)]);
@@ -518,9 +512,9 @@ public class CPU {
 		for(int i=24; i<32; i++) impls.add(i, prdp);
 		
 		for(int i=32; i<40; i++) impls.add(i, rbcc);
-		for(int i=40; i<48; i++) impls.add(i, rbdc);
+		for(int i=40; i<48; i++) impls.add(i, rbcp);
 		
-		for(int i=48; i<56; i++) impls.add(i, rbcp);
+		for(int i=48; i<56; i++) impls.add(i, rbdc);
 		for(int i=56; i<64; i++) impls.add(i, rbdp);
 		
 		impls.add(64, addrx);
