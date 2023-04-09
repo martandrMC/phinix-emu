@@ -67,8 +67,7 @@ public class TelnetServer extends Thread {
 				if(csoc.isInputShutdown() && csoc.isOutputShutdown()) break;
 				if(!outbound.isEmpty()) ostm.write(outbound.take());
 				if(inbound.remainingCapacity() > 0 && istm.available() > 0) inbound.put(istm.read());
-				System.err.println(outbound.remainingCapacity());
-				//Thread.sleep(0, 5000);
+				Thread.sleep(0, 5000);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
