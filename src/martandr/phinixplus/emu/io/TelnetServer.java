@@ -57,7 +57,7 @@ public class TelnetServer extends Thread {
 			ostm = csoc.getOutputStream();
 			
 			// IAC WON'T SGA IAC WON'T ECHO
-			ostm.write(new byte[] {-1, -5, 3, -1, -5, 1});
+			ostm.write(new byte[] {-1, -3, 3, -1, -2, 1});
 			ostm.flush();
 			// Wait for response commands and toss them out
 			while(istm.available() == 0) Thread.sleep(50);

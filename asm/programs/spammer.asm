@@ -9,5 +9,5 @@ outter:
 jmp ip outter-$
 
 message:
-#d "wtwrthwtfddfgrhwee!\r\n"
+#d "Hello!\r\n"
 #align 16
