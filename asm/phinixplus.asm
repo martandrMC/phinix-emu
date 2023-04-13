@@ -104,7 +104,10 @@
 	mov {dst: prim} jp							=> 0x0A`8	@ 0x0`4	@ dst
 	jmp jp										=> 0x0B`8	@ 0x04	@ 0x0`4
 	sip {dst: prim} {ims: u4}					=> 0x0C`8	@ ims	@ dst
-	jmp ip {iml: s8}							=> 0x0D`8	@ iml
+	jmp ip {iml: i16}							=> {
+		val = iml - $
+		0x0D`8	@ val`8
+	}
 	jnl {dst: prim} {src: prim} {imx: u16}		=> 0x0E`8	@ src	@ dst	@ imx
 	prd rf.{ims: hex}							=> 0x0F`8	@ ims	@ 0x0`4
 	prd {cnd: cond}								=> 0x02`5	@ cnd	@ 0x0`4	@ 0x0`4
@@ -179,8 +182,8 @@
 	mst {dst: prim} {src: prim}				=> 0x7E`8	@ src	@ dst
 	mst {dst: prim} {src: prim}	{imx: i16}	=> 0x7F`8	@ src	@ dst	@ imx
 
-	lsi {dst: prim} {iml: s8}	=> 0x8`4	@ iml	@ dst
-	lui {dst: prim} {iml: s8}	=> 0x9`4	@ iml	@ dst
+	lsi {dst: prim} {iml: i8}	=> 0x8`4	@ iml	@ dst
+	lui {dst: prim} {iml: u8}	=> 0x9`4	@ iml	@ dst
 	inp {dst: prim} {iml: u8}	=> 0xA`4	@ iml	@ dst
 	out {dst: prim} {iml: u8}	=> 0xB`4	@ iml	@ dst
 
@@ -204,7 +207,10 @@
 	mst {dst: prim} -{src: secd} {imx: i16}				=> 0xED`8	@ src	@ dst	@ imx
 	mst {dst: prim} {src: secd}+ {imx: i16}				=> 0xEE`8	@ src	@ dst	@ imx
 	mst {dst: prim} +{src: secd} {imx: i16}				=> 0xEF`8	@ src	@ dst	@ imx
-	jmp	ip {iml: s8} {cnd: cond}						=> 0x1E`5	@ cnd	@ iml
+	jmp	ip {iml: i16} {cnd: cond}						=> {
+		val = iml - $
+		0x1E`5	@ cnd	@ val`8
+	}
 	; blank space opcode hex F8
 	; blank space opcode hex F9
 	; blank space opcode hex FA
@@ -225,11 +231,40 @@
 	nul {dst: prim} => asm { mov {dst} zr }
 	nul {dst: secd}	=> asm { mov {dst} zr }
 	nul rf			=> asm { mov rf zr }
+	nul st			=> asm { bxt zr.0 }
 
 	inc {dst: prim}	=> asm { ads {dst} 0 }
 	inc {dst: secd}	=> asm { ads {dst} 0 }
 	dec {dst: prim}	=> asm { sbs {dst} 0 }
 	dec {dst: secd}	=> asm { sbs {dst} 0 }
+
+	lfi {dst: prim} {imx: i16}	=> 0x42`8	@ 0x0`4	@ dst	@ imx
+	lfi {dst: secd} {imx: i16}	=> 0x43`8	@ 0x0`4	@ dst	@ imx
+
+	sub {dst: prim} {imx: i16}				=> {
+		val = -imx
+		0x42`8	@ dst	@ dst	@ val`16
+	}
+	sub {dst: secd} {imx: i16}				=> {
+		val = -imx
+		0x43`8	@ dst	@ dst	@ val`16
+	}
+	sub {dst: prim} {src: prim} {imx: i16}	=> {
+		val = -imx
+		0x42`8	@ src	@ dst	@ val`16
+	}
+	sub {dst: secd} {src: prim} {imx: i16}	=> {
+		val = -imx
+		0x43`8	@ src	@ dst	@ val`16
+	}
+	cmp {src: prim} {imx: i16}				=> {
+		val = -imx
+		0x42`8	@ src	@ 0x0`4	@ val`16
+	}
+	cmp {src: secd} {imx: i16}				=> {
+		val = -imx
+		0x43`8	@ src	@ 0x0`4	@ val`16
+	}
 
 	add {dst: prim} {imx: i16}	=> 0x42`8	@ dst	@ dst	@ imx
 	add {dst: secd} {imx: i16}	=> 0x43`8	@ dst	@ dst	@ imx
@@ -244,6 +279,12 @@
 	nor {dst: prim} {imx: i16}	=> 0x5D`8	@ dst	@ dst	@ imx
 	xor {dst: prim} {imx: i16}	=> 0x5F`8	@ dst	@ dst	@ imx
 
+	jnl {dst: prim} {src: prim}	=> 0x0E`8	@ src	@ dst	@ 0x0`16
+	jnl {dst: prim} {imx: u16}	=> 0x0E`8	@ 0x0`4	@ dst	@ imx
+	jnl {src: prim} {imx: u16}	=> 0x0E`8	@ src	@ 0x6`4	@ imx
+	jnl {src: prim}				=> 0x0E`8	@ src	@ 0x6`4	@ 0x0`16
+	jnl {imx: u16}				=> 0x0E`8	@ 0x0`4	@ 0x6`4	@ imx
+
 	jmp {src: prim} 						=> 0x19`5	@ 0x0`3	@ src	@ 0x0`4
 	jmp {imx: i16} {cnd: cond}				=> 0x1A`5	@ cnd	@ 0x0`4	@ 0x0`4	@ imx
 	jmp {imx: i16} 							=> 0x1B`5	@ 0x0`3	@ 0x0`4	@ 0x0`4	@ imx
@@ -252,8 +293,8 @@
 
 	mld {dst: prim} {imx: i16}	=> 0x7D`8	@ 0x0`4	@ dst	@ imx
 	mst {dst: prim} {imx: i16}	=> 0x7F`8	@ 0x0`4	@ dst	@ imx
-	pop {dst: prim}				=> 0xE1`8	@ 0xB`4	@ dst
-	psh {dst: prim}				=> 0xEA`8	@ 0xB`4	@ dst
+	pop {dst: prim}				=> 0xE2`8	@ 0xB`4	@ dst
+	psh {dst: prim}				=> 0xE9`8	@ 0xB`4	@ dst
 }
 
 ; Soon :tm:

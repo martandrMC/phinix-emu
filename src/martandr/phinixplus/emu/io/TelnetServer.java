@@ -27,15 +27,22 @@ public class TelnetServer extends Thread {
 	}
 	
 	public int get() {
-		Integer val = inbound.poll();
-		return val == null ? 0 : val&255;
+		try {
+			return inbound.take();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			return 0;
+		}
 	}
 	
 	public int getPacked() {
-		int val = get();
-		if(val == 0) return 0;
-		val = val << 8 | get();
-		return val;
+		try {
+			int val = inbound.take();
+			return val << 8 | inbound.take();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			return 0;
+		}
 	}
 	
 	public void put(int i) {
@@ -61,13 +68,13 @@ public class TelnetServer extends Thread {
 			ostm.flush();
 			// Wait for response commands and toss them out
 			while(istm.available() == 0) Thread.sleep(50);
-			istm.skip(istm.available());
+			for(int i=istm.available(); i>0; i--) System.out.print(Integer.toHexString(istm.read()) + " ");
+			System.out.println();
 			
 			while(true) {
-				if(csoc.isInputShutdown() && csoc.isOutputShutdown()) break;
 				if(!outbound.isEmpty()) ostm.write(outbound.take());
 				if(inbound.remainingCapacity() > 0 && istm.available() > 0) inbound.put(istm.read());
-				Thread.sleep(0, 5000);
+				Thread.sleep(0);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
