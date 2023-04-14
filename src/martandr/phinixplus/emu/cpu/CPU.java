@@ -38,6 +38,9 @@ public class CPU {
 	public void execute() {
 		int instr_word = memory.read(state.reg_ip++);
 		int opc = getOpc(instr_word);
+		if(instr_word == 0x497B) {
+			System.out.print("");
+		}
 		if(state.skip) {
 			boolean is_double = (double_word[opc>>5] & (1<<(opc&31))) != 0;
 			if(is_double) state.reg_ip++;
@@ -136,48 +139,48 @@ public class CPU {
 		BiConsumer<Integer, State> subrx = (i, s) -> {
 			int a = s.primary_regfile[getDst(i)];
 			int b = s.primary_regfile[getSrc(i)];
-			int sum = a-b;
+			int sum = a+neg16(b);
 			setFlags(s, isNeg(sum), isOvf(a, b, sum), (sum&65536) != 0, isZero(sum));
 			s.primary_regfile[getDst(i)] = sum&65535;
 		};
 		BiConsumer<Integer, State> subry = (i, s) -> {
 			int a = s.secondary_regfile[getDst(i)];
 			int b = s.primary_regfile[getSrc(i)];
-			int sum = a-b;
+			int sum = a+neg16(b);
 			setFlags(s, isNeg(sum), isOvf(a, b, sum), (sum&65536) != 0, isZero(sum));
 			s.secondary_regfile[getDst(i)] = sum&65535;
 		};
 		BiConsumer<Integer, State> subsx = (i, s) -> {
 			int a = s.primary_regfile[getDst(i)];
 			int b = getIms(i);
-			int sum = a-b-1;
+			int sum = a+neg16(b+1);
 			setFlags(s, isNeg(sum), isOvf(a, b, sum), (sum&65536) != 0, isZero(sum));
 			s.primary_regfile[getDst(i)] = sum&65535;
 		};
 		BiConsumer<Integer, State> subsy = (i, s) -> {
 			int a = s.secondary_regfile[getDst(i)];
 			int b = getIms(i);
-			int sum = a-b-1;
+			int sum = a+neg16(b+1);
 			setFlags(s, isNeg(sum), isOvf(a, b, sum), (sum&65536) != 0, isZero(sum));
 			s.secondary_regfile[getDst(i)] = sum&65535;
 		};
 		BiConsumer<Integer, State> subc = (i, s) -> {
 			int a = s.primary_regfile[getDst(i)];
 			int b = s.primary_regfile[getSrc(i)];
-			int sum = a-b+(Main.isSet(s.reg_st, 13) ? 0 : -1);
+			int sum = a+neg16(b)+(Main.isSet(s.reg_st, 13) ? 0 : 65535);
 			setFlags(s, isNeg(sum), isOvf(a, b, sum), (sum&65536) != 0, isZero(sum));
 			s.primary_regfile[getDst(i)] = sum&65535;
 		};
 		BiConsumer<Integer, State> cmpx = (i, s) -> {
 			int a = s.primary_regfile[getDst(i)];
 			int b = s.primary_regfile[getSrc(i)];
-			int sum = a-b;
+			int sum = a+neg16(b);
 			setFlags(s, isNeg(sum), isOvf(a, b, sum), (sum&65536) != 0, isZero(sum));
 		};
 		BiConsumer<Integer, State> cmpy = (i, s) -> {
 			int a = s.secondary_regfile[getDst(i)];
 			int b = s.secondary_regfile[getSrc(i)];
-			int sum = a-b;
+			int sum = a+neg16(b);
 			setFlags(s, isNeg(sum), isOvf(a, b, sum), (sum&65536) != 0, isZero(sum));
 		};
 		BiConsumer<Integer, State> pen = (i, s) -> {
@@ -636,17 +639,23 @@ public class CPU {
 	private static int getIml(int instr_word) { return instr_word&255; }
 	private static int getIms(int instr_word) { return instr_word>>4&15; }
 	
+	// Read next word after instruction (contains 16 bit immediate)
+	private static int getImx() {
+		CPU cpu = Main.getCPU();
+		return cpu.getMemory().read(cpu.getState().reg_ip++);
+	}
+	
 	// Sign-extend 8 -> 16
 	private static int sxt8(int value) {
 		if(value <= 127) return value;
 		else return 0xFF00 | value;
 	}
 	
-	// Read next word after instruction (contains 16 bit immediate)
-	private static int getImx() {
-		CPU cpu = Main.getCPU();
-		return cpu.getMemory().read(cpu.getState().reg_ip++);
+	// Negate 16 bits
+	private static int neg16(int value) {
+		return (-value) & 65535;
 	}
+		
 	
 	// Evaluate a propery
 	private static boolean evalProp(int opcode, int regval, State state) {
