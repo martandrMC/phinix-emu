@@ -68,8 +68,10 @@ public class TelnetServer extends Thread {
 			ostm.flush();
 			// Wait for response commands and toss them out
 			while(istm.available() == 0) Thread.sleep(50);
-			for(int i=istm.available(); i>0; i--) System.out.print(Integer.toHexString(istm.read()) + " ");
-			System.out.println();
+			System.err.print("[DBG] Telnet response: ");
+			for(int i=istm.available(); i>0; i--)
+				System.err.print(Integer.toHexString(istm.read()) + " ");
+			System.err.println();
 			
 			while(true) {
 				if(!outbound.isEmpty()) ostm.write(outbound.take());

@@ -1,4 +1,5 @@
 collatz:
+	nul s2
 	lsi s1 27
 	lsi s3 1
 	mov rf s3
