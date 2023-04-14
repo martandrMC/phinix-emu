@@ -34,8 +34,47 @@ pop rp
 jmp rp
 
 cmd_dump:
-	lfi a4 unknown_text
-	jmp print_packed_string
+psh rp
+psh fp
+mov fp sp
+	jnl expect_parameter
+	jmp .exit a1.nzr
+	lfi a4 invalid_text
+	jnl read_hex_word
+	prd a2.nzr
+	jnl print_packed_string
+	prd a2.zer
+
+	mov s1 a1
+	.loop:
+	jmp .exit s1.zer
+		lsi t0 0x09
+		out t0 ttyraw
+
+		mov a1 s7
+		lbr a1 3
+		lbl a1 3
+		mov s7 a1
+		jnl print_hex_word
+
+		lfi t0 0x3A20
+		out t0 ttypkd
+		lfi t0 0x2020
+		out t0 ttypkd
+
+		jnl dump_line_hex
+		lfi t0 0x2020
+		out t0 ttypkd
+		jnl dump_line_text
+		lfi t0 0x0D0A
+		out t0 ttypkd
+	sbs s1 7
+	jmp ip .loop cr
+	.exit:
+mov sp fp
+pop fp
+pop rp
+jmp rp
 
 cmd_load:
 	lfi a4 unknown_text
@@ -99,6 +138,56 @@ mov fp sp
 mov sp fp
 pop fp
 pop rp
+jmp rp
+
+dump_line_hex:
+psh rp
+psh fp
+mov fp sp
+	psh s1
+	lsi s1 8
+	.loop:
+		mld a1 s7+
+		jnl print_hex_word
+		lsi t0 0x20
+		out t0 ttyraw
+	dec s1
+	jmp .loop s1.nzr
+	pop s1
+	sbs s7 7
+mov sp fp
+pop fp
+pop rp
+jmp rp
+
+dump_line_text:
+	lsi t0 8
+	.loop:
+		mld t1 s7
+		lbr t1 8
+		rbd rf.0 zr.zer
+		cmp t1 0x0020
+		rbc rf.0 ae
+		cmp t1 0x007F
+		rbc rf.0 bl
+		bxt rf.0
+		prd nc
+		lsi t1 0x2E
+		out t1 ttyraw
+
+		mld t1 s7+
+		and t1 0x00FF
+		rbd rf.0 zr.zer
+		cmp t1 0x0020
+		rbc rf.0 ae
+		cmp t1 0x007F
+		rbc rf.0 bl
+		bxt rf.0
+		prd nc
+		lsi t1 0x2E
+		out t1 ttyraw
+	dec t0
+	jmp .loop t0.nzr
 jmp rp
 
 invalid_text:
