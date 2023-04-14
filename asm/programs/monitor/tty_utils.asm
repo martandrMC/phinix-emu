@@ -1,5 +1,15 @@
+; Prints the packed string pointed by a4
+; ARGUMENTS: a4
+; CLOBERS: t0 t1 a4
 print_packed_string:
-
+	mld t0 a4+			; read the length of the string
+	.loop:
+	jmp .exit t0.zer	; exit if the length is zero
+		mld t1 a4+		; get a twochar
+		out t1 ttypkd	; print the twochar
+	dec t0				; decrement the length
+	jmp ip .loop		; repeat
+	.exit:
 jmp rp
 
 ; Prints the word given in register a1 in hex
@@ -17,6 +27,15 @@ print_hex_word:
         lbl a1 4			; shift a1 up 4 bits
     dec t0					; decrement loop counter
     jmp .loop t0.nzr		; repeat until counter is zero
+jmp rp
+
+; Reads and discards characters until the end of the line
+; CLOBERS: t0
+empty_input:
+	.loop:
+		inp t0 ttyraw	; read the char
+	cmp t0 0x000A		; compare it with '\n'
+	jmp ip .loop nq		; if it is not, repeat
 jmp rp
 
 ; Reads in a non-whitespace character in a1
@@ -76,8 +95,4 @@ mov fp sp
 mov sp fp
 pop fp
 pop rp
-jmp rp
-
-empty_input:
-
 jmp rp
