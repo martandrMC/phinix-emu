@@ -38,9 +38,6 @@ public class CPU {
 	public void execute() {
 		int instr_word = memory.read(state.reg_ip++);
 		int opc = getOpc(instr_word);
-		if(instr_word == 0x497B) {
-			System.out.print("");
-		}
 		if(state.skip) {
 			boolean is_double = (double_word[opc>>5] & (1<<(opc&31))) != 0;
 			if(is_double) state.reg_ip++;

@@ -240,6 +240,7 @@
 
 	lfi {dst: prim} {imx: i16}	=> 0x42`8	@ 0x0`4	@ dst	@ imx
 	lfi {dst: secd} {imx: i16}	=> 0x43`8	@ 0x0`4	@ dst	@ imx
+	bit {src: prim} {imx: i16}	=> 0x57`8	@ src	@ 0x0`4	@ imx
 
 	sub {dst: prim} {imx: i16}				=> {
 		val = -imx

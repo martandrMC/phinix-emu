@@ -1,3 +1,4 @@
+; p64-econded binary: p+41004A0@0@b1^h0M1m2`2d@<g`\@77Bm@=]42`giL;_M2a0D\0c8H0!!
 collatz:
 	nul s2
 	lsi s1 27

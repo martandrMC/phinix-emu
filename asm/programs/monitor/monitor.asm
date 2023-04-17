@@ -78,7 +78,7 @@ short_cmds_table:
 
 title_text:
 #d16 .end-$-1
-#d "\x1B[2JPHINIX+ Machine Code Monitor v0.2\r\n"
+#d "\x1B[2JPHINIX+ Machine Code Monitor v0.3\r\n"
 #d "Type ", 34`8, "hl", 34`8, " for a command listing.\r\n"
 #d "User memory starts at hex 0400\r\n\r\n"
 #align 16
@@ -94,9 +94,9 @@ unknown_text:
 
 #include "tty_utils.asm"
 #include "commands.asm"
-#addr 0x1000
-#include "tests/fibonacci.asm"
-#addr 0x1010
-#include "tests/collatz.asm"
+;#addr 0x1000
+;#include "tests/fibonacci.asm"
+;#addr 0x1010
+;#include "tests/collatz.asm"
 
 ;__________________________________________________
