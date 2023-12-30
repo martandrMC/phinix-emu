@@ -1,4 +1,4 @@
-package martandr.phinixplus.emu;
+package martandr.phinix.emu;
 
 import java.awt.EventQueue;
 import javax.swing.JFrame;

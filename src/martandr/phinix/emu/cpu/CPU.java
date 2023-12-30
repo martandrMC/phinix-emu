@@ -1,9 +1,9 @@
-package martandr.phinixplus.emu.cpu;
+package martandr.phinix.emu.cpu;
 
 import java.util.ArrayList;
 import java.util.function.BiConsumer;
 
-import martandr.phinixplus.emu.Main;
+import martandr.phinix.emu.Main;
 
 public class CPU {
 	public class State {

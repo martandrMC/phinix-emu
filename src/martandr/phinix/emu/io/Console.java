@@ -1,4 +1,4 @@
-package martandr.phinixplus.emu.io;
+package martandr.phinix.emu.io;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;

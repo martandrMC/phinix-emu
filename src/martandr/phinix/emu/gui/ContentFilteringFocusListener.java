@@ -1,4 +1,4 @@
-package martandr.phinixplus.emu.gui;
+package martandr.phinix.emu.gui;
 
 import java.awt.Toolkit;
 import java.awt.event.FocusEvent;

@@ -78,7 +78,7 @@ short_cmds_table:
 
 title_text:
 #d16 .end-$-1
-#d "\x1B[2JPHINIX+ Machine Code Monitor v0.3\r\n"
+#d "\x1B[2JPHINIX Machine Code Monitor v0.3\r\n"
 #d "Type ", 34`8, "hl", 34`8, " for a command listing.\r\n"
 #d "User memory starts at hex 0400\r\n\r\n"
 #align 16

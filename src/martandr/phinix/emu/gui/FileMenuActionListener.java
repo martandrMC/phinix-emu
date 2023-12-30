@@ -1,4 +1,4 @@
-package martandr.phinixplus.emu.gui;
+package martandr.phinix.emu.gui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -7,7 +7,7 @@ import java.nio.file.Paths;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import martandr.phinixplus.emu.Main;
+import martandr.phinix.emu.Main;
 
 public class FileMenuActionListener implements ActionListener {
 	private final int type;

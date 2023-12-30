@@ -1,4 +1,4 @@
-package martandr.phinixplus.emu.cpu;
+package martandr.phinix.emu.cpu;
 
 import java.io.File;
 import java.io.FileNotFoundException;

@@ -1,4 +1,4 @@
-package martandr.phinixplus.emu.io;
+package martandr.phinix.emu.io;
 
 import java.io.IOException;
 import java.io.InputStream;

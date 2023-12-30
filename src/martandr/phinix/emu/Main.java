@@ -1,16 +1,13 @@
-package martandr.phinixplus.emu;
+package martandr.phinix.emu;
 
 import java.io.File;
 import java.text.DecimalFormat;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-
-import martandr.phinixplus.emu.cpu.Addressable;
-import martandr.phinixplus.emu.cpu.CPU;
-import martandr.phinixplus.emu.cpu.UniformMemory;
-import martandr.phinixplus.emu.gui.GUI;
-import martandr.phinixplus.emu.io.Console;
-import martandr.phinixplus.emu.io.TelnetServer;
+import martandr.phinix.emu.cpu.Addressable;
+import martandr.phinix.emu.cpu.CPU;
+import martandr.phinix.emu.cpu.UniformMemory;
+import martandr.phinix.emu.gui.GUI;
+import martandr.phinix.emu.io.Console;
+import martandr.phinix.emu.io.TelnetServer;
 
 public class Main {
 	private static GUI gui;
